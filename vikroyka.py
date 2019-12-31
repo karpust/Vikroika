@@ -231,7 +231,7 @@ for _ in fortable:
     i += 1'''
 
 #  считывание с таблицы
-sset = aDoc.SelectionSets.Add('25')                       # создали пустой набор под номером
+sset = aDoc.SelectionSets.Add('2')                       # создали пустой набор под номером
 ftype = [0]
 fdata = ['ACAD_TABLE']
 ftype = win32com.client.VARIANT(VT_ARRAY | VT_I2, ftype)  # вариант из целого числа
@@ -460,61 +460,52 @@ vit('T2', 'Гб1i', 'Гб2i', 'Гб1', 'Гб2', 'B2')
 
 
 # скругления
-# , num_crd[G4i], num_crd[G4]))  # пробел после команды!
-aDoc.SendCommand("_line 100,100 200,200  ")
-
+# aDoc.SendCommand("_line 100,100 200,200  ")
 # aDoc.SendCommand('_arc 28.7,116.5 32.9,118.1 34.5,122.3 ')  # создать такую строку
 
 
 class MakeArcFromThree:
-    """строит дугу по именам трех двумерных точек"""
-    def __init__(self, start): # , center, end):
-        start = nam_crd[start]
-        # center = nam_crd[center]
-        # end = nam_crd[end]
-        start = start.copy()
-        # center = center.copy()
-        # end = end.copy()
+    """строит дугу по именам трех двумерных точек.
+    Создает строку вида ('_arc 28.7,116.5 32.9,118.1 34.5,122.3 ')
+    и отправляет ее командой в автокад"""
+    def __init__(self, start):
         self.start = start
-        # self.center = center
-        # self.end = end
-        # self.num = 0
+        start = nam_crd[start]
+        start = start.copy()
+        self.start = start
 
-    def threeToTwo(self, num):
+    def threeToTwo(self):
         """make три координаты в две"""
+        num = self.start.copy()
         num.pop()
-        self.num = num
-        return self.num
+        return num
 
     def listToString(self):
         """convert list to string"""
-        return ','.join([str(el) for el in (self.threeToTwo(nnn))])
-
-    # def removeSpaces(self):
-    #     """remove all spaces from string"""
-    #     return self.listToString().replace(' ', '')
-
-    # def writeCommand(self):
-    #     """make string of command to draw arc"""
-    #     return self.removeSpaces() + ' '
+        return ','.join([str(el) for el in (self.threeToTwo())])
 
     def writeCommand(self):
         """make string of command to draw arc"""
         return self.listToString() + ' '
 
-    def sendCommand(self):
+    def sendCommand(self, a, b, c):
         """send the command to AutoCad"""
-        c = '_Arc ' + self.writeCommand(self.start) + writeCommand(self, self.center) + writeCommand(self, self.end)
-        aDoc.SendCommand(c)
-nnn = [3.2, 1.6, 0]
-def main_arc():
-    d1 =
-    d = MakeArcFromThree('G2i', 'O2', 'P4')
-# d.threeToTwo(n)
-# d.listToString()
-# d.removeSpaces()
-# d.writeCommand()
-d.sendCommand()
+        com = '_Arc ' + a + b + c + ' '
+        aDoc.SendCommand(com)
+
+
+def main_arc(start, center, end):
+    d1 = MakeArcFromThree(start)
+    d2 = MakeArcFromThree(center)
+    d3 = MakeArcFromThree(end)
+    a = d1.writeCommand()
+    b = d2.writeCommand()
+    c = d3.writeCommand()
+    d1.sendCommand(a, b, c)
+
+
+main_arc('G2i', 'O2', 'P4')
+
 
 
 
