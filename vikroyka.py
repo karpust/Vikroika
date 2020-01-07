@@ -506,10 +506,27 @@ def main_arc(start, center, end):
 
 main_arc('G2i', 'O2', 'P4')
 
+# добираю точки для построения дуг
+to_nam_obj('G1i', 'G2i')
+nam_crd.setdefault('Ga', coord_p(nam_obj['G1iG2i'].Length, nam_obj['G1iP1'].Angle*grad, nam_crd['G1i']))
+main_arc('Ga', 'O1', 'G2i')
 
+to_nam_obj('A1', 'A')
+to_nam_obj('A1', 'A2')
+nam_crd.setdefault('Aa', coord_p(nam_obj['A1A2'].Length, nam_obj['A1A'].Angle*grad, nam_crd['A1']))
+to_nam_obj('Aa', 'A2')
+nam_crd.setdefault('Ar1', coord_p(nam_obj['AaA2'].Length*0.21, nam_obj['AaA2'].Angle*grad-90, mid_po('Aa', 'A2')))
+main_arc('Aa', 'Ar1', 'A2')
 
+to_nam_obj('A4', 'A5')
+nam_crd.setdefault('Ar2', coord_p(nam_obj['A4A5'].Length*0.145, nam_obj['A4A5'].Angle*grad-90, mid_po('A4', 'A5')))
+main_arc('A5', 'Ar2', 'A4')
 
+nam_crd.setdefault('Ar3', coord_p(0.7, nam_obj['P5P4'].Angle*grad+90, mid_po('P5', 'P4')))
+main_arc('P5', 'Ar3', 'P4')
 
+nam_crd.setdefault('Ar4', coord_p(0.3, nam_obj['P2P'].Angle*grad+90, mid_po('P', 'P2')))
+main_arc('P2', 'Ar4', 'P')
 
 print(text)
 print(lenght)
