@@ -150,12 +150,12 @@ def mid_po(a, b):                         # ф-я центр точка отре
     return f'''
 
 
-def add_arc(nam, r, start, end):                       # рисует дугу по варианту координат центра и радиусу
+def add_arc(nam, r, start, end):  # рисует дугу по варианту координат центра и радиусу
     c = msp.AddArc(to_var(nam_crd[nam]), r, start, end)
     return c
 
 
-def ang_bis(nam1, nam2):                       # вычисл угол биссектрисы
+def ang_bis(nam1, nam2):  # вычисл угол биссектрисы
     l1, l2 = nam_obj[nam1], nam_obj[nam2]
     if l1.Angle > l2.Angle:
         bis = (l1.Angle - l2.Angle) / 2
@@ -164,7 +164,7 @@ def ang_bis(nam1, nam2):                       # вычисл угол бисс�
     return bis*grad
 
 
-def po_at_arc(nam_cent, nam_stpo, nam_r, nam_lin, nam_len1, nam_len2):            # вычисл коорд точки по длине дуги
+def po_at_arc(nam_cent, nam_stpo, nam_r, nam_lin, nam_len1, nam_len2):  # вычисл коорд точки по длине дуги
     stpo = to_var(nam_crd[nam_stpo])
     r = main_dic[nam_r]
     lin = nam_obj[nam_lin]
@@ -298,8 +298,6 @@ else:
     main_dic.setdefault('Пос', 0.5)
 
 
-#print(main_dic)
-
 i = 1
 grad = 57.29577951308233
 
@@ -311,11 +309,15 @@ lenght = [main_dic['Дтс'], main_dic['ВПРЗ'], main_dic['Вб'], main_dic['
           main_dic['Олб'], main_dic['v'], main_dic['Сг'] + main_dic['Пг'], main_dic['v'], main_dic['v'],
           main_dic['v'], main_dic['v'], main_dic['Шс'] + main_dic['Пшс'], main_dic['v'],
           main_dic['Шг2'] + main_dic['Пшп'], main_dic['v'], main_dic['v'], main_dic['Пгпр'],
-          main_dic['Гб2'], main_dic['Сш'] / 3 + 0.5 + main_dic['Пшгор'],
+          main_dic['Пгпр'], main_dic['Сш'] / 3 + 0.5 + main_dic['Пшгор'],
           main_dic['v'], main_dic['v'], main_dic['v'], main_dic['v']]
 
 angle = [270, 270, 270, 270, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 270, 180, 270, 270, 270,
          270, 0, 180, 180, 270, 270]                               # углы поворота
+
+print(len(text))
+print(len(lenght))
+print(len(angle))
 
 nam_crd = dict(A0=[4, 140, 0])                                # имя т = координаты
 n = copy.copy(lenght)
@@ -439,7 +441,7 @@ to_nam_obj('G4i', 'a2')
 nam_crd.setdefault('P4', coord_p((nam_obj['G1iP1'].Length - 1) / 3, nam_obj['G4ia2'].Angle*grad, nam_crd['G4i']))
 to_nam_obj('P5', 'P4')
 
-nam_crd.setdefault('O3', (mid_po('P5', 'P4')))
+# nam_crd.setdefault('O3', (mid_po('P5', 'P4')))
 
 to_nam_obj('G4i', 'G4')
 to_nam_obj('G4i', 'G2i')
@@ -450,8 +452,6 @@ to_nam_obj('B', 'B3')
 inters_to_dict('B1', 'b1v', 'BB3', 3)
 inters_to_dict('B4', 'G5v', 'BB3', 3)
 
-# добавляет номера точек в рисунок
-add_pos_names()
 
 # вытачки
 vit('T4', 'Гт1i', 'Гт2i', 'Гт1', 'Гт2', 'B4')
@@ -514,6 +514,7 @@ main_arc('Ga', 'O1', 'G2i')
 to_nam_obj('A1', 'A')
 to_nam_obj('A1', 'A2')
 nam_crd.setdefault('Aa', coord_p(nam_obj['A1A2'].Length, nam_obj['A1A'].Angle*grad, nam_crd['A1']))
+
 to_nam_obj('Aa', 'A2')
 nam_crd.setdefault('Ar1', coord_p(nam_obj['AaA2'].Length*0.21, nam_obj['AaA2'].Angle*grad-90, mid_po('Aa', 'A2')))
 main_arc('Aa', 'Ar1', 'A2')
@@ -528,8 +529,10 @@ main_arc('P5', 'Ar3', 'P4')
 nam_crd.setdefault('Ar4', coord_p(0.3, nam_obj['P2P'].Angle*grad+90, mid_po('P', 'P2')))
 main_arc('P2', 'Ar4', 'P')
 
-print(text)
-print(lenght)
-print(angle)
-print('nam_crd:', list(nam_crd.keys()))
+to_nam_obj('T3', 'B3')
+
+# добавляет номера точек в рисунок
+add_pos_names()
+
+# print('nam_crd:', list(nam_crd.keys()))
 print('nam_obj:', list(nam_obj.keys()))
