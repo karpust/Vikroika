@@ -195,9 +195,14 @@ def add_pos_names():
 
 
 def vit(num_p0, dim1, dim2, dim3, dim4, num_p_end):   # Т4, Гт1i, Гт2i, Гт1, Гт2
-    """строит вытачки по измеренным глубинам"""
+    """строит вытачки по измеренным глубинам
+    vit('T1', 'Гтс1i', 'Гтс2i', 'Гтс1', 'Гтс2', 'B1')
+    vit('T2', 'Гб1i', 'Гб2i', 'Гб1', 'Гб2', 'B2')
+    vit('T4', 'Гт1i', 'Гт2i', 'Гт1', 'Гт2', 'B4')"""
+
     nam_crd.setdefault('1' + num_p0, coord_p(main_dic[dim1], 90, nam_crd[num_p0]))
-    nam_crd.setdefault('2' + num_p0, coord_p(main_dic[dim2], 270, nam_crd[num_p0]))
+    # nam_crd.setdefault('2' + num_p0, coord_p(main_dic[dim2], 270, nam_crd[num_p0]))
+    # nam_crd.setdefault('2' + num_p0, coord_p(nam_obj[p1.], 270, nam_crd[num_p0]))
     nam_crd.setdefault('3' + num_p0, coord_p(main_dic[dim3] / 2, 180, nam_crd[num_p0]))
     nam_crd.setdefault('4' + num_p0, coord_p(main_dic[dim3] / 2, 0, nam_crd[num_p0]))
     nam_crd.setdefault('5' + num_p0, coord_p(abs(main_dic[dim3] - main_dic[dim4]) / 2, 180, nam_crd['2' + num_p0]))
@@ -332,17 +337,18 @@ text = ['A0', 'T',    # Дтс
         'A1', 'v',    # 0.1
         'P', 'v',     # 0.1
         'G5', 'v',    # 0.1
-        'b1', 'v']    # 0.1
+        'b1', 'v',    # 0.1
+        'gi', 'v']    # 0.1
 
 lenght = [main_dic['Дтс'], main_dic['ВПРЗ'], main_dic['Вб'], main_dic['Дтс']*0.4, main_dic['Олг'], main_dic['Олт'],
           main_dic['Олб'], main_dic['v'], main_dic['Сг'] + main_dic['Пг'], main_dic['v'], main_dic['v'],
           main_dic['v'], main_dic['v'], main_dic['Шс'] + main_dic['Пшс'], main_dic['v'],
           main_dic['Шг2'] + main_dic['Пшп'], main_dic['v'], main_dic['v'], main_dic['Пгпр'],
           main_dic['Пгпр'], main_dic['Сш'] / 3 + 0.5 + main_dic['Пшгор'],
-          main_dic['v'], main_dic['v'], main_dic['v'], main_dic['v']]
+          main_dic['v'], main_dic['v'], main_dic['v'], main_dic['v'], main_dic['v']]
 
 angle = [270, 270, 270, 270, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 270, 180, 270, 270, 270,
-         270, 0, 180, 180, 270, 270]                               # углы поворота
+         270, 0, 180, 180, 270, 270, 270]                               # углы поворота
 
 print(len(text))
 print(len(lenght))
@@ -435,13 +441,15 @@ to_nam_obj('A3i', 'A4')
 nam_crd.setdefault('G5', coord_p(main_dic['Цг'], 180, nam_crd['G3']))
 to_nam_obj('G3', 'G5')
 
-for _ in range(2):
+nam_crd.setdefault('gi', (mid_po('g', 'G1')))
+
+for _ in range(3):
     main_fun()
 to_nam_obj('Ti', 'T3')
 inters_to_dict('T4', 'G5v', 'TiT3', 3)
 to_nam_obj('G5', 'T4')
-inters_to_dict('T1', 'b1v', 'TiT3', 3)
-to_nam_obj('b1', 'T1')
+inters_to_dict('T1', 'giv', 'TiT3', 3)
+to_nam_obj('gi', 'T1')
 
 nam_obj.setdefault('A4r', add_arc('A4', main_dic['Вг'], 4.5, 4.8))
 inters_to_dict('G6', 'A4r', 'G5T4', 1)
@@ -478,8 +486,13 @@ nam_crd.setdefault('O2', coord_p(nam_obj['G1iG4i'].Length * 0.2, ang_bis('G4iG4'
 to_nam_obj('G4i', 'O2')
 
 to_nam_obj('B', 'B3')
-inters_to_dict('B1', 'b1v', 'BB3', 3)
+inters_to_dict('B1', 'giv', 'BB3', 3)
 inters_to_dict('B4', 'G5v', 'BB3', 3)
+
+nam_crd.setdefault('gi', (mid_po('g', 'G1')))
+
+
+
 
 
 # вытачки
