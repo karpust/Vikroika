@@ -27,31 +27,31 @@ from datetime import datetime
 # l1 = timeit(one)
 # print(type(l1), l1.__name__)
 '------------------------------------------------------------------------------------------'
-"""пример декоратора который принимает аргументы и
- функции которая принимает аргументы"""
-
-
-def timeit(arg):
-    print(arg)
-
-    def outer(func):
-        def wrapper(*args, **kwargs):
-            start = datetime.now()
-            result = func(*args, **kwargs)
-            print(datetime.now() - start)
-            return result
-        return wrapper
-    return outer
-
-
-@timeit('name')
-def one(n):
-    l = [x for x in range(n) if x % 2 == 0]
-    return l
-
-# l1 = one(10)
-l1 = timeit('name1')(one)(10)
-print(l1)
+# """пример декоратора который принимает аргументы и
+#  функции которая принимает аргументы"""
+#
+#
+# def timeit(arg):
+#     print(arg)
+#
+#     def outer(func):
+#         def wrapper(*args, **kwargs):
+#             start = datetime.now()
+#             result = func(*args, **kwargs)
+#             print(datetime.now() - start)
+#             return result
+#         return wrapper
+#     return outer
+#
+#
+# @timeit('name')
+# def one(n):
+#     l = [x for x in range(n) if x % 2 == 0]
+#     return l
+#
+# # l1 = one(10)
+# l1 = timeit('name1')(one)(10)
+# print(l1)
 '------------------------------------------------------------------------------------------'
 
 
@@ -78,3 +78,10 @@ print(l1)
 # hello = hello()
 #
 # print(hello)  # выведет <b><i>hello habr</i></b>
+'-----------------------------------------------------------------------------------------------'
+a = [1, 2, 3, 4, 6, 7, 99, 88, 999]
+max = 0
+for i in a:
+    if i > max:
+        max = i
+print(max)

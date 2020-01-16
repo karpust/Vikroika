@@ -475,8 +475,20 @@ inters_to_dict('B4', 'G5v', 'BB3', 3)
 nam_crd.setdefault('gi', (mid_po('g', 'G1')))
 
 
+def adds_to_vit(a, b, c):
+    up_max = (a, b, c)
+    # down_max = max(main_dic['Гт2'].Length, main_dic['Гтс2'].Length, main_dic['Гб2'])
+    m = 0
+    k = 0
+    for i in range(3):
+        if main_dic[up_max[i]] > m:
+            m = main_dic[up_max[i]]
+            k = up_max[i]
+    m -= main_dic['Пт']
+    main_dic[k] = m
+    print(main_dic['Гт1'])
 
-
+adds_to_vit('Гт1', 'Гтс1', 'Гб1')
 
 # вытачки
 vit('T1', 'Гтс1i', 'Гтс2i', 'Гтс1', 'Гтс2', 'B1')
