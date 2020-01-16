@@ -201,8 +201,7 @@ def vit(num_p0, dim1, dim2, dim3, dim4, num_p_end):   # Т4, Гт1i, Гт2i, Г�
     vit('T4', 'Гт1i', 'Гт2i', 'Гт1', 'Гт2', 'B4')"""
 
     nam_crd.setdefault('1' + num_p0, coord_p(main_dic[dim1], 90, nam_crd[num_p0]))
-    # nam_crd.setdefault('2' + num_p0, coord_p(main_dic[dim2], 270, nam_crd[num_p0]))
-    # nam_crd.setdefault('2' + num_p0, coord_p(nam_obj[p1.], 270, nam_crd[num_p0]))
+    nam_crd.setdefault('2' + num_p0, coord_p(main_dic[dim2], 270, nam_crd[num_p0]))
     nam_crd.setdefault('3' + num_p0, coord_p(main_dic[dim3] / 2, 180, nam_crd[num_p0]))
     nam_crd.setdefault('4' + num_p0, coord_p(main_dic[dim3] / 2, 0, nam_crd[num_p0]))
     nam_crd.setdefault('5' + num_p0, coord_p(abs(main_dic[dim3] - main_dic[dim4]) / 2, 180, nam_crd['2' + num_p0]))
@@ -216,18 +215,6 @@ def vit(num_p0, dim1, dim2, dim3, dim4, num_p_end):   # Т4, Гт1i, Гт2i, Г�
     else:
         to_nam_obj('2' + num_p0, '3' + num_p0, '1' + num_p0, '4' + num_p0, '2' + num_p0)
     return
-
-# def vit(num_p0, dim1, dim2, dim3, dim4, num_p_end):   #
-#     """строит вытачки по вычислениям мерок:
-#     Cумма вытачек = (Сг+Пг)-(Ст+Пт)-Олт
-#     1/3 в спинку
-#     1/6 в полочку
-#     1/2 в боковой шов
-#     """
-
-
-
-
 
 '''-----------------------------------------------------------------------------------------------------------------'''
 # """создание таблицы один раз"""
@@ -349,10 +336,6 @@ lenght = [main_dic['Дтс'], main_dic['ВПРЗ'], main_dic['Вб'], main_dic['
 
 angle = [270, 270, 270, 270, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 270, 180, 270, 270, 270,
          270, 0, 180, 180, 270, 270, 270]                               # углы поворота
-
-print(len(text))
-print(len(lenght))
-print(len(angle))
 
 nam_crd = dict(A0=[4, 140, 0])                                # имя т = координаты
 n = copy.copy(lenght)
@@ -573,8 +556,41 @@ main_arc('P2', 'Ar4', 'P')
 
 to_nam_obj('T3', 'B3')
 
+def check_measure():
+    """проверяет правильность снятия мерок условием
+    Ст = сумме отрезков не входящих в вытачку по линии талии и
+    Сб = сумме отрезков не входящих в вытачку по линии бедер"""
+
+"""мерки глубин от талии до груди"""
+to_nam_obj('Ti', '3T1')
+to_nam_obj('4T1', '3T2')
+to_nam_obj('4T2', '3T4')
+to_nam_obj('4T4', 'T3')
+
+"""мерки глубин от талии до бедер"""
+to_nam_obj('Bi', '8T1')
+to_nam_obj('7T1', '8T2')
+to_nam_obj('7T2', '7T4')
+to_nam_obj('8T4', 'B3')
+measure_up = nam_obj['Ti3T1'].Length + nam_obj['4T13T2'].Length + nam_obj['4T23T4'].Length + nam_obj['4T4T3'].Length
+measure_down = nam_obj['Bi8T1'].Length + nam_obj['7T18T2'].Length + nam_obj['7T27T4'].Length + nam_obj['8T4B3'].Length
+
+if measure_up == main_dic['Ст'] and measure_down == main_dic['Сб']:
+    print('\nПоздравляю маэстро!!!!!!\nВы постигли глубины!')
+elif measure_up != main_dic['Ст'] and measure_down == main_dic['Сб']:
+    print('\nКлассная грудь! \nМожет все-таки замерим ее?', main_dic['Ст'] - measure_up)
+elif measure_up == main_dic['Ст'] and measure_down != main_dic['Сб']:
+    print('\nКажется попочка у нее что надо! \nА теперь померий ее правильно', main_dic['Сб'] - measure_down)
+else:
+    print('\nТы мерки снимала или че делала там?? '
+          '\nА ну перемеряй все нах!', main_dic['Ст'] - measure_up, main_dic['Сб'] - measure_down)
+
+# проверяет правильность снятых мерок глубин
+check_measure()
+
+
 # добавляет номера точек в рисунок
 add_pos_names()
 
-# print('nam_crd:', list(nam_crd.keys()))
-print('nam_obj:', list(nam_obj.keys()))
+# print('\n'+'nam_crd:', list(nam_crd.keys()))
+# # print('\n'+'nam_obj:', list(nam_obj.keys()))
