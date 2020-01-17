@@ -475,21 +475,33 @@ inters_to_dict('B4', 'G5v', 'BB3', 3)
 nam_crd.setdefault('gi', (mid_po('g', 'G1')))
 
 
-def adds_to_vit(a, b, c):
+def adds_to_vit1(a, b, c):
     up_max = (a, b, c)
     # down_max = max(main_dic['Гт2'].Length, main_dic['Гтс2'].Length, main_dic['Гб2'])
+    m = 50
+    k = 0
+    for i in range(3):
+        if main_dic[up_max[i]] < m:
+            m = main_dic[up_max[i]]
+            k = up_max[i]
+    m += main_dic['Пт']
+    main_dic[k] = m
+    print(main_dic[k])
+
+def adds_to_vit2(a, b, c):
+    up_max = (a, b, c)
     m = 0
     k = 0
     for i in range(3):
         if main_dic[up_max[i]] > m:
             m = main_dic[up_max[i]]
             k = up_max[i]
-    m -= main_dic['Пт']
+    m -= main_dic['Пб'] / 2
     main_dic[k] = m
     print(main_dic['Гт1'])
 
-adds_to_vit('Гт1', 'Гтс1', 'Гб1')
-
+# adds_to_vit1('Гт1', 'Гтс1', 'Гб1')
+# adds_to_vit2('Гт2', 'Гтс2', 'Гб2')
 # вытачки
 vit('T1', 'Гтс1i', 'Гтс2i', 'Гтс1', 'Гтс2', 'B1')
 vit('T2', 'Гб1i', 'Гб2i', 'Гб1', 'Гб2', 'B2')
@@ -570,6 +582,8 @@ to_nam_obj('T3', 'B3')
 
 def check_measure():
     """проверяет правильность снятия мерок условием
+    Ст = Сг - Олт - Сумма вытачек
+    Сб = Сг + Пг + (Пб - Пг) - Олб + Пб
     Ст = сумме отрезков не входящих в вытачку по линии талии и
     Сб = сумме отрезков не входящих в вытачку по линии бедер"""
 
@@ -586,6 +600,9 @@ to_nam_obj('7T2', '7T4')
 to_nam_obj('8T4', 'B3')
 measure_up = nam_obj['Ti3T1'].Length + nam_obj['4T13T2'].Length + nam_obj['4T23T4'].Length + nam_obj['4T4T3'].Length
 measure_down = nam_obj['Bi8T1'].Length + nam_obj['7T18T2'].Length + nam_obj['7T27T4'].Length + nam_obj['8T4B3'].Length
+print('measure_up = ', measure_up)
+print('measure_down = ', measure_down)
+
 
 if measure_up == main_dic['Ст'] and measure_down == main_dic['Сб']:
     print('\nПоздравляю маэстро!!!!!!\nВы постигли глубины!')
