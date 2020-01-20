@@ -475,33 +475,21 @@ inters_to_dict('B4', 'G5v', 'BB3', 3)
 nam_crd.setdefault('gi', (mid_po('g', 'G1')))
 
 
-def adds_to_vit1(a, b, c):
-    up_max = (a, b, c)
+def adds_to_vit(a, b):
+    up_max = (a, b)
     # down_max = max(main_dic['Гт2'].Length, main_dic['Гтс2'].Length, main_dic['Гб2'])
-    m = 50
+    m = 10
     k = 0
-    for i in range(3):
+    for i in range(2):
         if main_dic[up_max[i]] < m:
             m = main_dic[up_max[i]]
             k = up_max[i]
     m += main_dic['Пт']
     main_dic[k] = m
-    print(main_dic[k])
 
-def adds_to_vit2(a, b, c):
-    up_max = (a, b, c)
-    m = 0
-    k = 0
-    for i in range(3):
-        if main_dic[up_max[i]] > m:
-            m = main_dic[up_max[i]]
-            k = up_max[i]
-    m -= main_dic['Пб'] / 2
-    main_dic[k] = m
-    print(main_dic['Гт1'])
 
-# adds_to_vit1('Гт1', 'Гтс1', 'Гб1')
-# adds_to_vit2('Гт2', 'Гтс2', 'Гб2')
+adds_to_vit('Гтс1', 'Гб1')
+
 # вытачки
 vit('T1', 'Гтс1i', 'Гтс2i', 'Гтс1', 'Гтс2', 'B1')
 vit('T2', 'Гб1i', 'Гб2i', 'Гб1', 'Гб2', 'B2')
@@ -603,16 +591,18 @@ measure_down = nam_obj['Bi8T1'].Length + nam_obj['7T18T2'].Length + nam_obj['7T2
 print('measure_up = ', measure_up)
 print('measure_down = ', measure_down)
 
+up = main_dic['Ст'] + main_dic['Пт']
+down = main_dic['Сб'] + main_dic['Пб']
 
-if measure_up == main_dic['Ст'] and measure_down == main_dic['Сб']:
-    print('\nПоздравляю маэстро!!!!!!\nВы постигли глубины!')
-elif measure_up != main_dic['Ст'] and measure_down == main_dic['Сб']:
-    print('\nКлассная грудь! \nМожет все-таки замерим ее?', main_dic['Ст'] - measure_up)
-elif measure_up == main_dic['Ст'] and measure_down != main_dic['Сб']:
-    print('\nКажется попочка у нее что надо! \nА теперь померий ее правильно', main_dic['Сб'] - measure_down)
+if abs(measure_up - up) <= 0.5 and abs(measure_down - down) <= 0.5:
+    print('\nПоздравляю маэстро!!!!!!\nВы постигли глубины!', '\n', up - measure_up, down - measure_down)
+elif abs(measure_up - up) > 0.5 and abs(measure_down - down) <= 0.5:
+    print('\nКлассная грудь! \nМожет все-таки замерим ее?', '\n', up - measure_up)
+elif abs(measure_up - up) <= 0.5 and abs(measure_down - down) > 0.5:
+    print('\nКажется попочка у нее что надо! \nА теперь замерь ее правильно!', '\n', down - measure_down)
 else:
     print('\nТы мерки снимала или че делала там?? '
-          '\nА ну перемеряй все нах!', main_dic['Ст'] - measure_up, main_dic['Сб'] - measure_down)
+          '\nА ну перемеряй все нах!', up - measure_up, down - measure_down)
 
 # проверяет правильность снятых мерок глубин
 check_measure()
