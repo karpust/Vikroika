@@ -421,6 +421,10 @@ nam_crd.setdefault('A5', coord_p(nam_obj['A3iA4'].Length + 1, nam_obj['A3iG3'].A
 nam_crd.setdefault('A4', coord_p(main_dic['Сш'] / 3 + main_dic['Пшгор'], 180, nam_crd['A3i']))
 to_nam_obj('A3i', 'A4')
 
+to_nam_obj('G', 'G3')
+to_nam_obj('g', 'G3')
+to_nam_obj('G', 'g')    #???????????????????
+
 nam_crd.setdefault('G5', coord_p(main_dic['Цг'], 180, nam_crd['G3']))
 to_nam_obj('G3', 'G5')
 
@@ -476,15 +480,17 @@ nam_crd.setdefault('gi', (mid_po('g', 'G1')))
 
 
 def adds_to_vit(a, b):
-    up_max = (a, b)
-    # down_max = max(main_dic['Гт2'].Length, main_dic['Гтс2'].Length, main_dic['Гб2'])
-    m = 10
+    up_min = (a, b)
+    measure = main_dic['Гт1'] + main_dic['Гтс1'] + main_dic['Гб1']
+    comput = nam_obj['GG3'].length - nam_obj['Gg'].length - main_dic['Олт'] - main_dic['Ст'] - main_dic['Пт']
+    p = comput - measure
+    m = 100
     k = 0
     for i in range(2):
-        if main_dic[up_max[i]] < m:
-            m = main_dic[up_max[i]]
-            k = up_max[i]
-    m += main_dic['Пт']
+        if main_dic[up_min[i]] < m:
+            m = main_dic[up_min[i]]
+            k = up_min[i]
+    m += p  #main_dic['Пт']
     main_dic[k] = m
 
 
