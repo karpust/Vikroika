@@ -1,22 +1,22 @@
 import sys
 import copy
 import math
+import win32com.client
+from pythoncom import VT_R8, VT_ARRAY, VT_DISPATCH, VT_BSTR, VT_I2, VT_VARIANT
 
 sys.path.append("C:\\Users\\UserGeo\\AppData\Local\Programs\Python\Python37-32\Lib\site-packages\win32")
 sys.path.append("C:\\Users\\UserGeo\\AppData\Local\Programs\Python\Python37-32\Lib\site-packages")
 sys.path.append("C:\\Users\\UserGeo\\AppData\Local\Programs\Python\Python37-32\Lib\site-packages\win32\lib")
 sys.path.append("C:\\Users\\UserGeo\\AppData\Local\Programs\Python\Python37-32\Lib\site-packages\Pythowin")
 
-
-import win32com.client
-from pythoncom import VT_R8, VT_ARRAY, VT_DISPATCH, VT_BSTR, VT_I2, VT_VARIANT
 app = win32com.client.Dispatch("AutoCAD.Application")
 aDoc = app.ActiveDocument
 msp = aDoc.ModelSpace
 pfss = aDoc.PickfirstSelectionSet
 
 
-def to_var(p):                           # + преобраз список коорд в вариант
+def to_var(p):
+    """преобразует список координат в вариант"""
     p_v = win32com.client.VARIANT(VT_ARRAY | VT_R8, p)
     return p_v
 
@@ -37,7 +37,8 @@ def to_var(p):                           # + преобраз список ко�
 #     return()
 
 
-def to_nam_crd(b):                        # добавляет в словарь имя и коорд
+def to_nam_crd(b):
+    """Добавляет в словарь имя и координаты"""
     nam_crd.setdefault(text[1], b)
     return b
 
@@ -47,7 +48,8 @@ def to_nam_crd(b):                        # добавляет в словарь
 #     return
 
 
-def to_nam_obj(*args):               # рисует отрезок по именам точек, добавляет в словарь объект
+def to_nam_obj(*args):
+    """Рисует отрезок по именам точек, добавляет в словарь отрезок-объект"""
     lst = []
     for n in args:
         lst.append(n)
@@ -59,7 +61,9 @@ def to_nam_obj(*args):               # рисует отрезок по имен
     return
 
 
-def coord_p(l, a, b):                     # + дает коорд т по расст, углу(град), коорд нач т
+def coord_p(l, a, b):
+    """Вычисляет координаты по расстоянию, углу в градусах
+    и координатам начальной точки"""
     x1 = b[0]
     y1 = b[1]
     x2, y2 = x1+l*(math.cos(math.radians(a))), y1+l*(math.sin(math.radians(a)))
@@ -67,7 +71,8 @@ def coord_p(l, a, b):                     # + дает коорд т по рас
     return f
 
 
-def draw_line_po(p1, p2):                 # рисует отрезок по варианту координат
+def draw_line_po(p1, p2):
+    """Рисует отрезок по варианту координат"""
     p1 = to_var(p1)
     p2 = to_var(p2)
     lin = msp.AddLine(p1, p2)
@@ -105,6 +110,8 @@ def draw_line_po(p1, p2):                 # рисует отрезок по в�
 
 
 def main_fun():
+    """Создает объект используя списки длин, углов, координат начальных точек,
+    добавляет в словарь объектов"""
     p0 = nam_crd[text[0]]
     p1 = coord_p(lenght[0], angle[0], p0)
     if text[1] == 'v':                    # если имя = v то запись в словарь и выйти из ф в против выполнить
@@ -117,17 +124,22 @@ def main_fun():
     return
 
 
-def intersect_to_po(lin1, lin2, n):       # + ф-я получения точки пересечения отрезков/дуг
+def intersect_to_po(lin1, lin2, n):
+    """Определяет точки пересечения отрезков и дуг"""
     p_var = lin1.IntersectWith(lin2, n)
     return p_var
 
 
-def inters_to_dict(a, b, c, n):           # добавляет в словарь отрисованный отрезок или дугу
+def inters_to_dict(a, b, c, n):
+    """добавляет в словарь точку пересечения заданных отрезков/дуг
+    а - имя новой точки
+    в,с - имя сущ точек"""
     nam_crd.setdefault(a, list(intersect_to_po(nam_obj[b], nam_obj[c], n)))
     return()
 
 
-def mid_po(a, b):                         # ф-я центр точка отрезка
+def mid_po(a, b):
+    """Определяет 3х-мерные координаты центра отрезка ab"""
     a = nam_crd[a]
     b = nam_crd[b]
     c = (a[0]+b[0])/2
@@ -150,12 +162,16 @@ def mid_po(a, b):                         # ф-я центр точка отре
 #     return f
 
 
-def add_arc(nam, r, start, end):  # рисует дугу по варианту координат центра и радиусу
+def add_arc(nam, r, start, end):
+    """Рисует дугу по варианту координат центра и радиусу
+    nam - имя центра"""
     c = msp.AddArc(to_var(nam_crd[nam]), r, start, end)
     return c
 
 
-def ang_bis(nam1, nam2):  # вычисл угол биссектрисы
+def ang_bis(nam1, nam2):
+    """вычисляет угол биссектрисы в градусах
+    по имени двух объектов"""
     l1, l2 = nam_obj[nam1], nam_obj[nam2]
     if l1.Angle > l2.Angle:
         bis = (l1.Angle - l2.Angle) / 2
@@ -164,7 +180,8 @@ def ang_bis(nam1, nam2):  # вычисл угол биссектрисы
     return bis*grad
 
 
-def po_at_arc(nam_cent, nam_stpo, nam_r, nam_lin, nam_len1, nam_len2):  # вычисл коорд точки по длине дуги
+def po_at_arc(nam_cent, nam_stpo, nam_r, nam_lin, nam_len1, nam_len2):
+    """Вычисляет координаты точки по длине дуги"""
     stpo = to_var(nam_crd[nam_stpo])
     r = main_dic[nam_r]
     lin = nam_obj[nam_lin]
@@ -181,6 +198,7 @@ def po_at_arc(nam_cent, nam_stpo, nam_r, nam_lin, nam_len1, nam_len2):  # выч
 
 
 def add_pos_names():
+    """Добавляет имена точек в чертеж"""
     nam = list(nam_crd.keys())
     for k in nam:
         p0 = nam_crd[k]
@@ -194,7 +212,7 @@ def add_pos_names():
     return()
 
 
-def vit(num_p0, dim1, dim2, dim3, dim4, num_p_end):   # Т4, Гт1i, Гт2i, Гт1, Гт2
+def vit(num_p0, dim1, dim2, dim3, dim4, num_p_end):
     """строит вытачки по измеренным глубинам
     vit('T1', 'Гтс1i', 'Гтс2i', 'Гтс1', 'Гтс2', 'B1')
     vit('T2', 'Гб1i', 'Гб2i', 'Гб1', 'Гб2', 'B2')
@@ -215,6 +233,99 @@ def vit(num_p0, dim1, dim2, dim3, dim4, num_p_end):   # Т4, Гт1i, Гт2i, Г�
     else:
         to_nam_obj('2' + num_p0, '3' + num_p0, '1' + num_p0, '4' + num_p0, '2' + num_p0)
     return
+
+
+def adds_to_vit(a, b):
+    """Определяет раствор вытачек в соответствии с прибавкой"""
+    up_min = (a, b)
+    measure = main_dic['Гт1'] + main_dic['Гтс1'] + main_dic['Гб1']
+    comput = nam_obj['GG3'].length - nam_obj['Gg'].length - main_dic['Олт'] - main_dic['Ст'] - main_dic['Пт']
+    p = comput - measure
+    m = 100
+    k = 0
+    for i in range(2):
+        if main_dic[up_min[i]] < m:
+            m = main_dic[up_min[i]]
+            k = up_min[i]
+    m += p  # main_dic['Пт']
+    main_dic[k] = m
+
+
+class MakeArcFromThree:
+    """строит дугу по именам трех двумерных точек.
+    Создает строку вида ('_arc 28.7,116.5 32.9,118.1 34.5,122.3 ')
+    и отправляет ее командой в автокад"""
+    def __init__(self, start):
+        self.start = start
+        start = nam_crd[start]
+        start = start.copy()
+        self.start = start
+
+    def threeToTwo(self):
+        """make три координаты в две"""
+        num = self.start.copy()
+        num.pop()
+        return num
+
+    def listToString(self):
+        """convert list to string"""
+        return ','.join([str(el) for el in (self.threeToTwo())])
+
+    def writeCommand(self):
+        """make string of command to draw arc"""
+        return self.listToString() + ' '
+
+    def sendCommand(self, a, b, c):
+        """send the command to AutoCad"""
+        com = '_Arc ' + a + b + c + ' '
+        aDoc.SendCommand(com)
+
+
+def main_arc(start, center, end):
+    d1 = MakeArcFromThree(start)
+    d2 = MakeArcFromThree(center)
+    d3 = MakeArcFromThree(end)
+    a = d1.writeCommand()
+    b = d2.writeCommand()
+    c = d3.writeCommand()
+    d1.sendCommand(a, b, c)
+
+
+def check_measure():
+    """проверяет правильность снятия мерок условием
+    Ст = Сг - Олт - Сумма вытачек
+    Сб = Сг + Пг + (Пб - Пг) - Олб + Пб
+    Ст = сумме отрезков не входящих в вытачку по линии талии и
+    Сб = сумме отрезков не входящих в вытачку по линии бедер"""
+    """мерки глубин от талии до груди"""
+    to_nam_obj('Ti', '3T1')
+    to_nam_obj('4T1', '3T2')
+    to_nam_obj('4T2', '3T4')
+    to_nam_obj('4T4', 'T3')
+
+    """мерки глубин от талии до бедер"""
+    to_nam_obj('Bi', '8T1')
+    to_nam_obj('7T1', '8T2')
+    to_nam_obj('7T2', '7T4')
+    to_nam_obj('8T4', 'B3')
+    measure_up = nam_obj['Ti3T1'].Length + nam_obj['4T13T2'].Length + nam_obj['4T23T4'].Length + nam_obj['4T4T3'].Length
+    measure_down = nam_obj['Bi8T1'].Length + nam_obj['7T18T2'].Length + nam_obj['7T27T4'].Length + nam_obj['8T4B3'].Length
+    print('Прибавка по талии факт = ', round(measure_up - main_dic['Ст'], 1))
+    print('Прибавка по бедрам факт = ', round(measure_down - main_dic['Сб'], 1))
+
+    up = main_dic['Ст'] + main_dic['Пт']
+    down = main_dic['Сб'] + main_dic['Пб']
+
+    if abs(measure_up - up) <= 0.5 and abs(measure_down - down) <= 0.5:
+        print('\nПоздравляю маэстро!!!!!!\nВы постигли глубины!', '\n', up - measure_up, down - measure_down)
+    elif abs(measure_up - up) > 0.5 and abs(measure_down - down) <= 0.5:
+        print('\nКлассная грудь! \nМожет все-таки замерим ее?', '\n', up - measure_up)
+    elif abs(measure_up - up) <= 0.5 and abs(measure_down - down) > 0.5:
+        print('\nКажется попочка у нее что надо! \nА теперь замерь ее правильно!', '\n', down - measure_down)
+    else:
+        print('\nТы мерки снимала или че делала там?? '
+              '\nА ну перемеряй все нах!', up - measure_up, down - measure_down)
+
 
 '''-----------------------------------------------------------------------------------------------------------------'''
 # """создание таблицы один раз"""
@@ -335,9 +446,9 @@ lenght = [main_dic['Дтс'], main_dic['ВПРЗ'], main_dic['Вб'], main_dic['
           main_dic['v'], main_dic['v'], main_dic['v'], main_dic['v'], main_dic['v']]
 
 angle = [270, 270, 270, 270, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 270, 180, 270, 270, 270,
-         270, 0, 180, 180, 270, 270, 270]                               # углы поворота
+         270, 0, 180, 180, 270, 270, 270]  # углы поворота
 
-nam_crd = dict(A0=[4, 140, 0])                                # имя т = координаты
+nam_crd = dict(A0=[4, 140, 0])  # координаты начальной точки построения чертежа
 n = copy.copy(lenght)
 nam_obj = dict()
 
@@ -423,7 +534,7 @@ to_nam_obj('A3i', 'A4')
 
 to_nam_obj('G', 'G3')
 to_nam_obj('g', 'G3')
-to_nam_obj('G', 'g')    #???????????????????
+to_nam_obj('G', 'g')
 
 nam_crd.setdefault('G5', coord_p(main_dic['Цг'], 180, nam_crd['G3']))
 to_nam_obj('G3', 'G5')
@@ -465,8 +576,6 @@ to_nam_obj('G4i', 'a2')
 nam_crd.setdefault('P4', coord_p((nam_obj['G1iP1'].Length - 1) / 3, nam_obj['G4ia2'].Angle*grad, nam_crd['G4i']))
 to_nam_obj('P5', 'P4')
 
-# nam_crd.setdefault('O3', (mid_po('P5', 'P4')))
-
 to_nam_obj('G4i', 'G4')
 to_nam_obj('G4i', 'G2i')
 nam_crd.setdefault('O2', coord_p(nam_obj['G1iG4i'].Length * 0.2, ang_bis('G4iG4', 'G4iG2i'), nam_crd['G4i']))
@@ -477,21 +586,6 @@ inters_to_dict('B1', 'giv', 'BB3', 3)
 inters_to_dict('B4', 'G5v', 'BB3', 3)
 
 nam_crd.setdefault('gi', (mid_po('g', 'G1')))
-
-
-def adds_to_vit(a, b):
-    up_min = (a, b)
-    measure = main_dic['Гт1'] + main_dic['Гтс1'] + main_dic['Гб1']
-    comput = nam_obj['GG3'].length - nam_obj['Gg'].length - main_dic['Олт'] - main_dic['Ст'] - main_dic['Пт']
-    p = comput - measure
-    m = 100
-    k = 0
-    for i in range(2):
-        if main_dic[up_min[i]] < m:
-            m = main_dic[up_min[i]]
-            k = up_min[i]
-    m += p  #main_dic['Пт']
-    main_dic[k] = m
 
 
 adds_to_vit('Гтс1', 'Гб1')
@@ -505,47 +599,6 @@ vit('T4', 'Гт1i', 'Гт2i', 'Гт1', 'Гт2', 'B4')
 # скругления
 # aDoc.SendCommand("_line 100,100 200,200  ")
 # aDoc.SendCommand('_arc 28.7,116.5 32.9,118.1 34.5,122.3 ')  # создать такую строку
-
-
-class MakeArcFromThree:
-    """строит дугу по именам трех двумерных точек.
-    Создает строку вида ('_arc 28.7,116.5 32.9,118.1 34.5,122.3 ')
-    и отправляет ее командой в автокад"""
-    def __init__(self, start):
-        self.start = start
-        start = nam_crd[start]
-        start = start.copy()
-        self.start = start
-
-    def threeToTwo(self):
-        """make три координаты в две"""
-        num = self.start.copy()
-        num.pop()
-        return num
-
-    def listToString(self):
-        """convert list to string"""
-        return ','.join([str(el) for el in (self.threeToTwo())])
-
-    def writeCommand(self):
-        """make string of command to draw arc"""
-        return self.listToString() + ' '
-
-    def sendCommand(self, a, b, c):
-        """send the command to AutoCad"""
-        com = '_Arc ' + a + b + c + ' '
-        aDoc.SendCommand(com)
-
-
-def main_arc(start, center, end):
-    d1 = MakeArcFromThree(start)
-    d2 = MakeArcFromThree(center)
-    d3 = MakeArcFromThree(end)
-    a = d1.writeCommand()
-    b = d2.writeCommand()
-    c = d3.writeCommand()
-    d1.sendCommand(a, b, c)
-
 
 main_arc('G2i', 'O2', 'P4')
 
@@ -573,42 +626,6 @@ nam_crd.setdefault('Ar4', coord_p(0.3, nam_obj['P2P'].Angle*grad+90, mid_po('P',
 main_arc('P2', 'Ar4', 'P')
 
 to_nam_obj('T3', 'B3')
-
-def check_measure():
-    """проверяет правильность снятия мерок условием
-    Ст = Сг - Олт - Сумма вытачек
-    Сб = Сг + Пг + (Пб - Пг) - Олб + Пб
-    Ст = сумме отрезков не входящих в вытачку по линии талии и
-    Сб = сумме отрезков не входящих в вытачку по линии бедер"""
-
-"""мерки глубин от талии до груди"""
-to_nam_obj('Ti', '3T1')
-to_nam_obj('4T1', '3T2')
-to_nam_obj('4T2', '3T4')
-to_nam_obj('4T4', 'T3')
-
-"""мерки глубин от талии до бедер"""
-to_nam_obj('Bi', '8T1')
-to_nam_obj('7T1', '8T2')
-to_nam_obj('7T2', '7T4')
-to_nam_obj('8T4', 'B3')
-measure_up = nam_obj['Ti3T1'].Length + nam_obj['4T13T2'].Length + nam_obj['4T23T4'].Length + nam_obj['4T4T3'].Length
-measure_down = nam_obj['Bi8T1'].Length + nam_obj['7T18T2'].Length + nam_obj['7T27T4'].Length + nam_obj['8T4B3'].Length
-print('measure_up = ', measure_up)
-print('measure_down = ', measure_down)
-
-up = main_dic['Ст'] + main_dic['Пт']
-down = main_dic['Сб'] + main_dic['Пб']
-
-if abs(measure_up - up) <= 0.5 and abs(measure_down - down) <= 0.5:
-    print('\nПоздравляю маэстро!!!!!!\nВы постигли глубины!', '\n', up - measure_up, down - measure_down)
-elif abs(measure_up - up) > 0.5 and abs(measure_down - down) <= 0.5:
-    print('\nКлассная грудь! \nМожет все-таки замерим ее?', '\n', up - measure_up)
-elif abs(measure_up - up) <= 0.5 and abs(measure_down - down) > 0.5:
-    print('\nКажется попочка у нее что надо! \nА теперь замерь ее правильно!', '\n', down - measure_down)
-else:
-    print('\nТы мерки снимала или че делала там?? '
-          '\nА ну перемеряй все нах!', up - measure_up, down - measure_down)
 
 # проверяет правильность снятых мерок глубин
 check_measure()
