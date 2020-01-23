@@ -15,10 +15,10 @@ msp = aDoc.ModelSpace
 pfss = aDoc.PickfirstSelectionSet
 
 
-def to_var(p):
+def to_var(coord_po: list):
     """преобразует список координат в вариант"""
-    p_v = win32com.client.VARIANT(VT_ARRAY | VT_R8, p)
-    return p_v
+    coord_po_variant = win32com.client.VARIANT(VT_ARRAY | VT_R8, coord_po)
+    return coord_po_variant
 
 
 # def number_p(a, b):                   # - номер точки, вход-список коорд точки
@@ -37,10 +37,10 @@ def to_var(p):
 #     return()
 
 
-def to_nam_crd(b):
+def to_nam_crd(coord: list):
     """Добавляет в словарь имя и координаты"""
-    nam_crd.setdefault(text[1], b)
-    return b
+    nam_crd.setdefault(text[1], coord)
+    return coord
 
 
 # def to_nam_obj(nam1, nam2):               # рисует отрезок по именам точек, добавляет в словарь объект
@@ -48,7 +48,7 @@ def to_nam_crd(b):
 #     return
 
 
-def to_nam_obj(*args):
+def to_nam_obj(*args):  # names of points
     """Рисует отрезок по именам точек, добавляет в словарь отрезок-объект"""
     lst = []
     for n in args:
@@ -61,22 +61,22 @@ def to_nam_obj(*args):
     return
 
 
-def coord_p(l, a, b):
+def coord_p(dim, ang, coord_start_po):
     """Вычисляет координаты по расстоянию, углу в градусах
     и координатам начальной точки"""
-    x1 = b[0]
-    y1 = b[1]
-    x2, y2 = x1+l*(math.cos(math.radians(a))), y1+l*(math.sin(math.radians(a)))
+    x1 = coord_start_po[0]
+    y1 = coord_start_po[1]
+    x2, y2 = x1+dim*(math.cos(math.radians(ang))), y1+dim*(math.sin(math.radians(ang)))
     f = [x2, y2, 0]
     return f
 
 
-def draw_line_po(p1, p2):
+def draw_line_po(coord_p1, coord_p2):
     """Рисует отрезок по варианту координат"""
-    p1 = to_var(p1)
-    p2 = to_var(p2)
-    lin = msp.AddLine(p1, p2)
-    return lin
+    coord_p1 = to_var(coord_p1)
+    coord_p2 = to_var(coord_p2)
+    line = msp.AddLine(coord_p1, coord_p2)
+    return line
 
 
 # def draw_line_nam(nam1, nam2):       # + рисует отрезок по именам точек
@@ -124,28 +124,28 @@ def main_fun():
     return
 
 
-def intersect_to_po(lin1, lin2, n):
+def intersect_to_po(line1, line2, number):
     """Определяет точки пересечения отрезков и дуг"""
-    p_var = lin1.IntersectWith(lin2, n)
-    return p_var
+    inters_po_var = line1.IntersectWith(line2, number)
+    return inters_po_var
 
 
-def inters_to_dict(a, b, c, n):
+def inters_to_dict(new_name_po, name_po1, name_po2, number):
     """добавляет в словарь точку пересечения заданных отрезков/дуг
     а - имя новой точки
     в,с - имя сущ точек"""
-    nam_crd.setdefault(a, list(intersect_to_po(nam_obj[b], nam_obj[c], n)))
+    nam_crd.setdefault(new_name_po, list(intersect_to_po(nam_obj[name_po1], nam_obj[name_po2], number)))
     return()
 
 
-def mid_po(a, b):
+def mid_po(name_po_start, name_po_end):
     """Определяет 3х-мерные координаты центра отрезка ab"""
-    a = nam_crd[a]
-    b = nam_crd[b]
-    c = (a[0]+b[0])/2
-    d = (a[1]+b[1])/2
-    f = [c, d, 0]
-    return f
+    a = nam_crd[name_po_start]
+    b = nam_crd[name_po_end]
+    x = (a[0]+b[0])/2
+    y = (a[1]+b[1])/2
+    coord_po_mid = [x, y, 0]
+    return coord_po_mid
 
 
 # def two_thir_po(a, b):
@@ -162,17 +162,17 @@ def mid_po(a, b):
 #     return f
 
 
-def add_arc(nam, r, start, end):
+def add_arc(name_center_po, r, start_ang, end_ang):
     """Рисует дугу по варианту координат центра и радиусу
     nam - имя центра"""
-    c = msp.AddArc(to_var(nam_crd[nam]), r, start, end)
+    c = msp.AddArc(to_var(nam_crd[name_center_po]), r, start_ang, end_ang)
     return c
 
 
-def ang_bis(nam1, nam2):
+def ang_bis(name_obj1, name_obj2):
     """вычисляет угол биссектрисы в градусах
     по имени двух объектов"""
-    l1, l2 = nam_obj[nam1], nam_obj[nam2]
+    l1, l2 = nam_obj[name_obj1], nam_obj[name_obj2]
     if l1.Angle > l2.Angle:
         bis = (l1.Angle - l2.Angle) / 2
     else:
@@ -180,21 +180,20 @@ def ang_bis(nam1, nam2):
     return bis*grad
 
 
-def po_at_arc(nam_cent, nam_stpo, nam_r, nam_lin, nam_len1, nam_len2):
+def po_at_arc(name_center_po, name_r_obj, nam_line_obj, nam_dim1, nam_dim2):
     """Вычисляет координаты точки по длине дуги"""
-    stpo = to_var(nam_crd[nam_stpo])
-    r = main_dic[nam_r]
-    lin = nam_obj[nam_lin]
-    len_circ = math.pi * r * 2
-    len_arc = main_dic[nam_len1] - main_dic[nam_len2]
-    cent = nam_crd[nam_cent]
-    xc = cent[0]
-    yc = cent[1]
-    ang = lin.Angle + (len_arc*2*math.pi)/len_circ
-    x1 = math.cos(ang) * r + xc
-    y1 = math.sin(ang) * r + yc
-    f = [x1, y1, 0]
-    return f
+    r = main_dic[name_r_obj]
+    line = nam_obj[nam_line_obj]
+    len_circle = math.pi * r * 2
+    len_arc = main_dic[nam_dim1] - main_dic[nam_dim2]
+    coord_center = nam_crd[name_center_po]
+    x_center = coord_center[0]
+    y_center = coord_center[1]
+    ang = line.Angle + (len_arc*2*math.pi)/len_circle
+    x1 = math.cos(ang) * r + x_center
+    y1 = math.sin(ang) * r + y_center
+    coord = [x1, y1, 0]
+    return coord
 
 
 def add_pos_names():
@@ -226,13 +225,31 @@ def vit(num_p0, dim1, dim2, dim3, dim4, num_p_end):
     nam_crd.setdefault('6' + num_p0, coord_p(abs(main_dic[dim3] - main_dic[dim4]) / 2, 0, nam_crd['2' + num_p0]))
     nam_crd.setdefault('7' + num_p0, coord_p(abs(main_dic[dim3] - main_dic[dim4]) / 2, 180, nam_crd[num_p_end]))
     nam_crd.setdefault('8' + num_p0, coord_p(abs(main_dic[dim3] - main_dic[dim4]) / 2, 0, nam_crd[num_p_end]))
+
     if (main_dic[dim3] - main_dic[dim4]) > 0:
-        to_nam_obj('7' + num_p0, '5' + num_p0, '3' + num_p0, '1' + num_p0, '4' + num_p0, '6' + num_p0, '8' + num_p0)
+        lst = ['7' + num_p0, '5' + num_p0, '3' + num_p0, '1' + num_p0, '4' + num_p0, '6' + num_p0, '8' + num_p0]
+        to_nam_obj(lst)
+        c = make_list_name_obj(lst)
+        print(c)
     elif (main_dic[dim3] - main_dic[dim4]) < 0:
-        to_nam_obj('7' + num_p0, '5' + num_p0, '4' + num_p0, '1' + num_p0, '3' + num_p0, '6' + num_p0, '8' + num_p0)
+        lst = ('7' + num_p0, '5' + num_p0, '4' + num_p0, '1' + num_p0, '3' + num_p0, '6' + num_p0, '8' + num_p0)
+        to_nam_obj(lst)
     else:
-        to_nam_obj('2' + num_p0, '3' + num_p0, '1' + num_p0, '4' + num_p0, '2' + num_p0)
+        lst = ('2' + num_p0, '4' + num_p0, '1' + num_p0, '3' + num_p0, '2' + num_p0)
+        to_nam_obj(lst)
+
     return
+
+
+def make_list_name_obj(list_name_po):
+    list_name_obj = []
+    for i in range(len(list_name_po)-1):
+        name_obj = list_name_po[i] + list_name_po[i+1]
+        list_name_obj.append(name_obj)
+    return list_name_obj
+
+
+
 
 
 def adds_to_vit(a, b):
@@ -558,7 +575,7 @@ nam_obj.setdefault('G6r', add_arc('G6', main_dic['Вг2'], 1, 2))
 inters_to_dict('G7', 'G6r', 'G6A4', 1)
 nam_obj['G6r'].delete()
 
-nam_crd.setdefault('G8', po_at_arc('G6', 'G7', 'Вг2', 'G6A4', 'Шг2', 'Шг1'))
+nam_crd.setdefault('G8', po_at_arc('G6', 'Вг2', 'G6A4', 'Шг2', 'Шг1'))
 
 to_nam_obj('G6', 'G8')
 nam_crd.setdefault('G9', coord_p(nam_obj['G6A4'].Length, nam_obj['G6G8'].Angle*grad, nam_crd['G6']))
@@ -635,4 +652,4 @@ check_measure()
 add_pos_names()
 
 # print('\n'+'nam_crd:', list(nam_crd.keys()))
-# # print('\n'+'nam_obj:', list(nam_obj.keys()))
+# print('\n'+'nam_obj:', list(nam_obj.keys()))
