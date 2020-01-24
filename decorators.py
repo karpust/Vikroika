@@ -1,6 +1,6 @@
 """использовать декоратор стоит если код повторяется и
 если что-то можно вынести за скобки"""
-
+import math
 from datetime import datetime
 '------------------------------------------------------------------------------------------'
 # """пример декоратора
@@ -79,9 +79,29 @@ from datetime import datetime
 #
 # print(hello)  # выведет <b><i>hello habr</i></b>
 '-----------------------------------------------------------------------------------------------'
-a = [1, 2, 3, 4, 6, 7, 99, 88, 999]
-max = 0
-for i in a:
-    if i > max:
-        max = i
-print(max)
+# a = [1, 2, 3, 4, 6, 7, 99, 88, 999]
+# max = 0
+# for i in a:
+#     if i > max:
+#         max = i
+# print(max)
+
+# import functools
+#
+#
+# def greet(greeting, name1, name):
+#     print('%s, %s %s!' % (greeting, name1, name))
+#
+#
+# greet = functools.partial(greet, 'превед', 'негодяй')
+# greet('красавчик')
+
+
+l = ['Коля', 'Маша', 'Витя']
+
+def people(*args):
+   return args
+
+print(people(l))
+
+help(math)

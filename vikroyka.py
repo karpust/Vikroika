@@ -21,6 +21,11 @@ def to_var(coord_po: list):
     return coord_po_variant
 
 
+def to_real(var):
+    """преобразует вариант в действительное число"""
+    real = win32com.client.VARIANT(VT_BSTR, var)
+    return real
+
 # def number_p(a, b):                   # - номер точки, вход-список коорд точки
 #     pt1 = copy.copy(a)
 #     pt1[:] = [i+.05 for i in pt1]
@@ -227,16 +232,25 @@ def vit(num_p0, dim1, dim2, dim3, dim4, num_p_end):
     nam_crd.setdefault('8' + num_p0, coord_p(abs(main_dic[dim3] - main_dic[dim4]) / 2, 0, nam_crd[num_p_end]))
 
     if (main_dic[dim3] - main_dic[dim4]) > 0:
-        lst = ['7' + num_p0, '5' + num_p0, '3' + num_p0, '1' + num_p0, '4' + num_p0, '6' + num_p0, '8' + num_p0]
-        to_nam_obj(lst)
-        c = make_list_name_obj(lst)
-        print(c)
+        to_nam_obj('7' + num_p0, '5' + num_p0, '3' + num_p0, '1' + num_p0, '4' + num_p0, '6' + num_p0, '8' + num_p0)
+        lst = ('7' + num_p0, '5' + num_p0, '3' + num_p0, '1' + num_p0, '4' + num_p0, '6' + num_p0, '8' + num_p0)
+        lst = make_list_name_obj(lst)
+        c1 = coord_p(7, nam_obj[lst[3]], to_real(nam_obj[lst[3]].StartPoint))
+        # c2 = mid_po(lst[3], c1)
+        # coord_p()
+
+
+        print(lst)
     elif (main_dic[dim3] - main_dic[dim4]) < 0:
+        to_nam_obj('7' + num_p0, '5' + num_p0, '4' + num_p0, '1' + num_p0, '3' + num_p0, '6' + num_p0, '8' + num_p0)
         lst = ('7' + num_p0, '5' + num_p0, '4' + num_p0, '1' + num_p0, '3' + num_p0, '6' + num_p0, '8' + num_p0)
-        to_nam_obj(lst)
+        lst = make_list_name_obj(lst)
+        print(lst)
     else:
+        to_nam_obj('2' + num_p0, '4' + num_p0, '1' + num_p0, '3' + num_p0, '2' + num_p0)
         lst = ('2' + num_p0, '4' + num_p0, '1' + num_p0, '3' + num_p0, '2' + num_p0)
-        to_nam_obj(lst)
+        lst = make_list_name_obj(lst)
+        print(lst)
 
     return
 
@@ -266,6 +280,33 @@ def adds_to_vit(a, b):
             k = up_min[i]
     m += p  # main_dic['Пт']
     main_dic[k] = m
+
+
+# class Vitochka:
+#     """строит вытачки по измеренным глубинам
+#             vit('T1', 'Гтс1i', 'Гтс2i', 'Гтс1', 'Гтс2', 'B1')
+#             vit('T2', 'Гб1i', 'Гб2i', 'Гб1', 'Гб2', 'B2')
+#             vit('T4', 'Гт1i', 'Гт2i', 'Гт1', 'Гт2', 'B4')"""
+#     def __init__(self, num_p0, dim1, dim2, dim3, dim4, num_po_end):
+#         self.num_po = num_p0
+#         self.dim1 = dim1
+#         self.dim2 = dim2
+#         self.dim3 = dim3
+#         self.dim4 = dim4
+#         self.num_po_end = num_po_end
+#
+#     def make_po(self, num_p0, dim1, dim2, dim3, dim4, num_po_end):
+#         for i in range(8):
+#
+#         nam_crd.setdefault('1' + num_p0, coord_p(main_dic[dim1], 90, nam_crd[num_p0]))
+#         nam_crd.setdefault('2' + num_p0, coord_p(main_dic[dim2], 270, nam_crd[num_p0]))
+#         nam_crd.setdefault('3' + num_p0, coord_p(main_dic[dim3] / 2, 180, nam_crd[num_p0]))
+#         nam_crd.setdefault('4' + num_p0, coord_p(main_dic[dim3] / 2, 0, nam_crd[num_p0]))
+#         nam_crd.setdefault('5' + num_p0, coord_p(abs(main_dic[dim3] - main_dic[dim4]) / 2, 180, nam_crd['2' + num_p0]))
+#         nam_crd.setdefault('6' + num_p0, coord_p(abs(main_dic[dim3] - main_dic[dim4]) / 2, 0, nam_crd['2' + num_p0]))
+#         nam_crd.setdefault('7' + num_p0, coord_p(abs(main_dic[dim3] - main_dic[dim4]) / 2, 180, nam_crd[num_po_end]))
+#         nam_crd.setdefault('8' + num_p0, coord_p(abs(main_dic[dim3] - main_dic[dim4]) / 2, 0, nam_crd[num_po_end]))
+
 
 
 class MakeArcFromThree:
@@ -652,4 +693,4 @@ check_measure()
 add_pos_names()
 
 # print('\n'+'nam_crd:', list(nam_crd.keys()))
-# print('\n'+'nam_obj:', list(nam_obj.keys()))
+print('\n'+'nam_obj:', list(nam_obj.keys()))
