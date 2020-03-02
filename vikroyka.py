@@ -3,7 +3,10 @@ import copy
 import math
 import win32com.client
 from pythoncom import VT_R8, VT_ARRAY, VT_DISPATCH, VT_BSTR, VT_I2, VT_VARIANT
-
+import pythoncom
+# print(help(win32com.client))
+print(dir(win32com.client))
+# print(help(win32com.client))
 sys.path.append("C:\\Users\\UserGeo\\AppData\Local\Programs\Python\Python37-32\Lib\site-packages\win32")
 sys.path.append("C:\\Users\\UserGeo\\AppData\Local\Programs\Python\Python37-32\Lib\site-packages")
 sys.path.append("C:\\Users\\UserGeo\\AppData\Local\Programs\Python\Python37-32\Lib\site-packages\win32\lib")
@@ -23,7 +26,7 @@ def to_var(coord_po: list):
 
 def to_real(var):
     """преобразует вариант в действительное число"""
-    real = win32com.client.VARIANT(VT_BSTR, var)
+    real = win32com.client.Dispatch()
     return real
 
 # def number_p(a, b):                   # - номер точки, вход-список коорд точки
