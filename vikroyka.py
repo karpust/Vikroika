@@ -14,6 +14,7 @@ aDoc = app.ActiveDocument
 msp = aDoc.ModelSpace
 pfss = aDoc.PickfirstSelectionSet
 
+print(dir(win32com.client))
 
 def to_var(coord_po: list):
     """преобразует список координат в вариант"""
@@ -23,7 +24,7 @@ def to_var(coord_po: list):
 
 def to_real(var):
     """преобразует вариант в действительное число"""
-    real = win32com.client.VARIANT(VT_BSTR, var)
+    real = win32com.client.VARIANT(VT_R8, var)
     return real
 
 # def number_p(a, b):                   # - номер точки, вход-список коорд точки
@@ -143,14 +144,21 @@ def inters_to_dict(new_name_po, name_po1, name_po2, number):
     return()
 
 
-def mid_po(name_po_start, name_po_end):
-    """Определяет 3х-мерные координаты центра отрезка ab"""
-    a = nam_crd[name_po_start]
-    b = nam_crd[name_po_end]
-    x = (a[0]+b[0])/2
-    y = (a[1]+b[1])/2
-    coord_po_mid = [x, y, 0]
-    return coord_po_mid
+def mid_po(a, b=[]):
+    """Определяет 3х-мерные координаты центра отрезка a или середину между точками а, b
+    возвращает список 3х-мерных координат"""
+    if a in nam_obj:
+        a1 = nam_obj[a].StartPoint
+        b1 = nam_obj[a].EndPoint
+        x = (a1[0]+b1[0])/2
+        y = (a1[1]+b1[1])/2
+        coord_po_mid = [x, y, 0]
+        return coord_po_mid
+    else:
+        x = (a[0]+b[0])/2
+        y = (a[1]+b[1])/2
+        coord_po_mid = [x, y, 0]
+        return coord_po_mid
 
 
 # def two_thir_po(a, b):
@@ -235,9 +243,12 @@ def vit(num_p0, dim1, dim2, dim3, dim4, num_p_end):
         to_nam_obj('7' + num_p0, '5' + num_p0, '3' + num_p0, '1' + num_p0, '4' + num_p0, '6' + num_p0, '8' + num_p0)
         lst = ('7' + num_p0, '5' + num_p0, '3' + num_p0, '1' + num_p0, '4' + num_p0, '6' + num_p0, '8' + num_p0)
         lst = make_list_name_obj(lst)
-        c1 = coord_p(7, nam_obj[lst[3]], to_real(nam_obj[lst[3]].StartPoint))
-        # c2 = mid_po(lst[3], c1)
-        # coord_p()
+        nam_crd.setdefault('c1', coord_p(7, nam_obj[lst[2]].Angle*grad, nam_obj[lst[2]].StartPoint))
+        nam_crd.setdefault('c2', mid_po(nam_obj[lst[2]].StartPoint, nam_crd['c1']))
+        nam_crd.setdefault('c3', coord_p(0.5, nam_obj[lst[2]].Angle*grad+90, nam_crd['c2']))
+        # main_arc('c1', 'c3', '3T4')
+        nam_obj.setdefault('arc1', main_arc('c1', 'c3', '3T4'))
+        print(nam_obj['arc1'].ArcLength)
 
 
         print(lst)
@@ -530,7 +541,8 @@ inters_to_dict('a1', 'G3v', 'A0iv', 3)
 for _ in range(2):
     main_fun()
 inters_to_dict('G4', 'Gv', 'a2v', 3)
-nam_crd.setdefault('G2', (mid_po('G1', 'G4')))
+to_nam_obj('G1', 'G4')
+nam_crd.setdefault('G2', (mid_po('G1G4')))
 for _ in range(1):
     main_fun()
 inters_to_dict('T2', 'G2v', 'Tiv', 3)
@@ -597,7 +609,8 @@ to_nam_obj('G', 'g')
 nam_crd.setdefault('G5', coord_p(main_dic['Цг'], 180, nam_crd['G3']))
 to_nam_obj('G3', 'G5')
 
-nam_crd.setdefault('gi', (mid_po('g', 'G1')))
+to_nam_obj('g', 'G1')
+nam_crd.setdefault('gi', (mid_po('gG1')))
 
 for _ in range(3):
     main_fun()
@@ -643,7 +656,7 @@ to_nam_obj('B', 'B3')
 inters_to_dict('B1', 'giv', 'BB3', 3)
 inters_to_dict('B4', 'G5v', 'BB3', 3)
 
-nam_crd.setdefault('gi', (mid_po('g', 'G1')))
+nam_crd.setdefault('gi', (mid_po('gG1')))
 
 
 adds_to_vit('Гтс1', 'Гб1')
@@ -670,17 +683,18 @@ to_nam_obj('A1', 'A2')
 nam_crd.setdefault('Aa', coord_p(nam_obj['A1A2'].Length, nam_obj['A1A'].Angle*grad, nam_crd['A1']))
 
 to_nam_obj('Aa', 'A2')
-nam_crd.setdefault('Ar1', coord_p(nam_obj['AaA2'].Length*0.21, nam_obj['AaA2'].Angle*grad-90, mid_po('Aa', 'A2')))
+nam_crd.setdefault('Ar1', coord_p(nam_obj['AaA2'].Length*0.21, nam_obj['AaA2'].Angle*grad-90, mid_po('AaA2')))
 main_arc('Aa', 'Ar1', 'A2')
 
 to_nam_obj('A4', 'A5')
-nam_crd.setdefault('Ar2', coord_p(nam_obj['A4A5'].Length*0.145, nam_obj['A4A5'].Angle*grad-90, mid_po('A4', 'A5')))
+nam_crd.setdefault('Ar2', coord_p(nam_obj['A4A5'].Length*0.145, nam_obj['A4A5'].Angle*grad-90, mid_po('A4A5')))
 main_arc('A5', 'Ar2', 'A4')
 
-nam_crd.setdefault('Ar3', coord_p(0.7, nam_obj['P5P4'].Angle*grad+90, mid_po('P5', 'P4')))
+nam_crd.setdefault('Ar3', coord_p(0.7, nam_obj['P5P4'].Angle*grad+90, mid_po('P5P4')))
 main_arc('P5', 'Ar3', 'P4')
 
-nam_crd.setdefault('Ar4', coord_p(0.3, nam_obj['P2P'].Angle*grad+90, mid_po('P', 'P2')))
+to_nam_obj('P', 'P2')
+nam_crd.setdefault('Ar4', coord_p(0.3, nam_obj['P2P'].Angle*grad+90, mid_po('PP2')))
 main_arc('P2', 'Ar4', 'P')
 
 to_nam_obj('T3', 'B3')
@@ -694,3 +708,4 @@ add_pos_names()
 
 # print('\n'+'nam_crd:', list(nam_crd.keys()))
 print('\n'+'nam_obj:', list(nam_obj.keys()))
+
