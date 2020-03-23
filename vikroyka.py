@@ -14,12 +14,20 @@ aDoc = app.ActiveDocument
 msp = aDoc.ModelSpace
 pfss = aDoc.PickfirstSelectionSet
 
-print(dir(win32com.client))
+# print(dir(win32com.client))
+
 
 def to_var(coord_po: list):
     """преобразует список координат в вариант"""
     coord_po_variant = win32com.client.VARIANT(VT_ARRAY | VT_R8, coord_po)
     return coord_po_variant
+
+
+def two_to_three(coord_po: list):
+    """преобразует двумерные координаты в трехмерные"""
+    if len(coord_po) < 3:
+        coord_po.append(0)
+    return coord_po
 
 
 def to_real(var):
@@ -238,6 +246,39 @@ def add_pos_names():
     return()
 
 
+def create_third_po_at_line(object_name, dim, change_angle, name_new_po='Ar'):
+    """ищет третью точку для построения дуги по имени
+    объекта-отрезка и расстоянию до дуги"""
+    mid = mid_po(nam_obj[object_name].StartPoint, nam_obj[object_name].EndPoint)
+    ang = nam_obj[object_name].Angle*grad + change_angle
+    c = coord_p(dim, ang, mid)
+    nam_crd[name_new_po] = c
+    return c
+
+
+def mirror_by_two_po(fdata, name_po1, name_po2):
+    """отражает объект по имени последнего созданного
+     объекта и именам двух точек оси отражения"""
+    point1 = to_var(two_to_three(nam_crd[name_po1]))
+    point2 = to_var(two_to_three(nam_crd[name_po2]))
+    select_last(fdata).Mirror(point1, point2)
+    return
+
+
+def make_curve7(lst, num_p0, n=2):
+    """Строит дугу на 7 см выше линии Т
+    на вытачке и линию к середине этой дуги"""
+    nam_crd['c1'] = coord_p(7, nam_obj[lst[n]].Angle*grad, nam_obj[lst[n]].StartPoint)
+    nam_crd['c2'] = mid_po(nam_obj[lst[n]].StartPoint, nam_crd['c1'])
+    nam_crd['c3'] = coord_p(0.5, nam_obj[lst[n]].Angle*grad-90, nam_crd['c2'])
+    main_arc('c1', 'c3', '4' + num_p0)
+    mirror_by_two_po('ARC', '1' + num_p0, num_p0)
+    nam_obj.setdefault('arc1', select_last('ARC'))
+    to_nam_obj('1' + num_p0, "c3")
+    mirror_by_two_po('LINE', '1' + num_p0, num_p0)
+    return
+
+
 def vit(num_p0, dim1, dim2, dim3, dim4, num_p_end):
     """строит вытачки по измеренным глубинам
     vit('T1', 'Гтс1i', 'Гтс2i', 'Гтс1', 'Гтс2', 'B1')
@@ -254,31 +295,52 @@ def vit(num_p0, dim1, dim2, dim3, dim4, num_p_end):
     nam_crd.setdefault('8' + num_p0, coord_p(abs(main_dic[dim3] - main_dic[dim4]) / 2, 0, nam_crd[num_p_end]))
 
     if (main_dic[dim3] - main_dic[dim4]) > 0:
-        to_nam_obj('7' + num_p0, '5' + num_p0, '3' + num_p0, '1' + num_p0, '4' + num_p0, '6' + num_p0, '8' + num_p0)
-        lst = ('7' + num_p0, '5' + num_p0, '3' + num_p0, '1' + num_p0, '4' + num_p0, '6' + num_p0, '8' + num_p0)
-        print(lst)
-
-        # todo: выделить в отдельную функцию. 7см с закруглением
+        # to_nam_obj('7' + num_p0, '5' + num_p0, '3' + num_p0, '1' + num_p0, '4' + num_p0, '6' + num_p0, '8' + num_p0)
+        to_nam_obj('8' + num_p0, '6' + num_p0, '4' + num_p0, '1' + num_p0, '3' + num_p0, '5' + num_p0, '7' + num_p0)
+        # lst = ('7' + num_p0, '5' + num_p0, '3' + num_p0, '1' + num_p0, '4' + num_p0, '6' + num_p0, '8' + num_p0)
+        lst = ('8' + num_p0, '6' + num_p0, '4' + num_p0, '1' + num_p0, '3' + num_p0, '5' + num_p0, '7' + num_p0)
         lst = make_list_name_obj(lst)
-        nam_crd.setdefault('c1', coord_p(7, nam_obj[lst[2]].Angle*grad, nam_obj[lst[2]].StartPoint))
-        nam_crd.setdefault('c2', mid_po(nam_obj[lst[2]].StartPoint, nam_crd['c1']))
-        nam_crd.setdefault('c3', coord_p(0.5, nam_obj[lst[2]].Angle*grad+90, nam_crd['c2']))
-        main_arc('c1', 'c3', '3T4')
-        nam_obj.setdefault('arc1', select_last('ARC'))
-        to_nam_obj("1T4", "c3")
-        # todo edn
+
+        # #  построение дуг вытачки
+        # create_third_po_at_line(lst[1], 0.1, 90)
+        # main_arc('5' + num_p0, 'Ar', '3' + num_p0)
+        # mirror_by_two_po('ARC', '1' + num_p0, num_p0)
+        # create_third_po_at_line(lst[2], 0.3, 90)
+        # main_arc('3' + num_p0, 'Ar', '1' + num_p0)
+        # mirror_by_two_po('ARC', '1' + num_p0, num_p0)
+
+        # построение верхней дуги вытачки 7см и линии
+        make_curve7(lst, num_p0)
+        # построение нижней дуги вытачки
+        # create_third_po_at_line(lst[1], 0.4, 90)
+        # main_arc('3'+num_p0, 'Ar', '5'+num_p0)
+        # mirror_by_two_po('ARC', '1'+num_p0, num_p0)
+
+
 
     elif (main_dic[dim3] - main_dic[dim4]) < 0:
         to_nam_obj('7' + num_p0, '5' + num_p0, '4' + num_p0, '1' + num_p0, '3' + num_p0, '6' + num_p0, '8' + num_p0)
         lst = ('7' + num_p0, '5' + num_p0, '4' + num_p0, '1' + num_p0, '3' + num_p0, '6' + num_p0, '8' + num_p0)
         lst = make_list_name_obj(lst)
-        print(lst)
+
+        # построение верхней дуги вытачки 7см и линии
+        make_curve7(lst, num_p0)
+        # построение нижней дуги вытачки
+        create_third_po_at_line(lst[1], 0.4, 90)
+        main_arc('5'+num_p0, 'Ar', '4'+num_p0)
+        mirror_by_two_po('ARC', '1'+num_p0, num_p0)
+
     else:
         to_nam_obj('2' + num_p0, '4' + num_p0, '1' + num_p0, '3' + num_p0, '2' + num_p0)
         lst = ('2' + num_p0, '4' + num_p0, '1' + num_p0, '3' + num_p0, '2' + num_p0)
         lst = make_list_name_obj(lst)
-        print(lst)
 
+        # построение верхней дуги вытачки 7см и линии
+        make_curve7(lst, num_p0, 1)
+        # построение нижней дуги вытачки
+        create_third_po_at_line(lst[0], 0.4, 90)
+        main_arc('2'+num_p0, 'Ar', '4'+num_p0)
+        mirror_by_two_po('ARC', '1'+num_p0, num_p0)
     return
 
 
@@ -288,9 +350,6 @@ def make_list_name_obj(list_name_po):
         name_obj = list_name_po[i] + list_name_po[i+1]
         list_name_obj.append(name_obj)
     return list_name_obj
-
-
-
 
 
 def adds_to_vit(a, b):
@@ -530,6 +589,11 @@ nam_crd = dict(A0=[4, 140, 0])  # координаты начальной точ
 n = copy.copy(lenght)
 nam_obj = dict()
 
+nam_crd.setdefault('c1', 0)
+nam_crd.setdefault('c2', 0)
+nam_crd.setdefault('c3', 0)
+nam_crd.setdefault('Ar', 0)
+
 
 for _ in range(8):
     main_fun()
@@ -677,9 +741,6 @@ vit('T4', 'Гт1i', 'Гт2i', 'Гт1', 'Гт2', 'B4')
 
 
 # скругления
-# aDoc.SendCommand("_line 100,100 200,200  ")
-# aDoc.SendCommand('_arc 28.7,116.5 32.9,118.1 34.5,122.3 ')  # создать такую строку
-
 main_arc('G2i', 'O2', 'P4')
 
 # добираю точки для построения дуг
@@ -708,13 +769,17 @@ main_arc('P2', 'Ar4', 'P')
 
 to_nam_obj('T3', 'B3')
 
+create_third_po_at_line('A0iU', 0.2, -90)
+main_arc('A', 'Ar', 'U')
+
 # проверяет правильность снятых мерок глубин
 check_measure()
 
 
 # добавляет номера точек в рисунок
-add_pos_names()
+# add_pos_names()
 
 # print('\n'+'nam_crd:', list(nam_crd.keys()))
-print('\n'+'nam_obj:', list(nam_obj.keys()))
+# print('\n'+'nam_obj:', list(nam_obj.keys()))
+
 
