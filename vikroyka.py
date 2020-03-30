@@ -243,15 +243,28 @@ def vit(num_p0, dim1, dim2, dim3, dim4, num_p_end):
         to_nam_obj('7' + num_p0, '5' + num_p0, '3' + num_p0, '1' + num_p0, '4' + num_p0, '6' + num_p0, '8' + num_p0)
         lst = ('7' + num_p0, '5' + num_p0, '3' + num_p0, '1' + num_p0, '4' + num_p0, '6' + num_p0, '8' + num_p0)
         lst = make_list_name_obj(lst)
+
+        # todo выделить в отдельную ф-ю
         nam_crd.setdefault('c1', coord_p(7, nam_obj[lst[2]].Angle*grad, nam_obj[lst[2]].StartPoint))
         nam_crd.setdefault('c2', mid_po(nam_obj[lst[2]].StartPoint, nam_crd['c1']))
         nam_crd.setdefault('c3', coord_p(0.5, nam_obj[lst[2]].Angle*grad+90, nam_crd['c2']))
-        # main_arc('c1', 'c3', '3T4')
-        nam_obj.setdefault('arc1', main_arc('c1', 'c3', '3T4'))
-        print(nam_obj['arc1'].ArcLength)
-
-
+        main_arc('c1', 'c3', '3T4')
+        sset = aDoc.SelectionSets.Add('arcs')  # создали пустой набор под номером
+        ftype = [0]
+        fdata = ['ARC']
+        ftype = win32com.client.VARIANT(VT_ARRAY | VT_I2, ftype)  # вариант из целого числа
+        fdata = win32com.client.VARIANT(VT_ARRAY | VT_VARIANT, fdata)  # вариант из варианта из строки
+        sset.Select(5, None, None, ftype, fdata)  # добавили в набор таблицу
+        n = sset.count
+        arc = sset.Item(0)  # возвращает последний созд объект
+        nam_obj.setdefault('arc1', arc)
+        sset.Delete()
+        to_nam_obj("1T4", "c3")
+        ll = nam_obj['arc1'].ArcLength
         print(lst)
+        # todo выделить в отдельную ф-ю
+        #  отступ для многострочного туду
+        #  и еще ода строка туду
     elif (main_dic[dim3] - main_dic[dim4]) < 0:
         to_nam_obj('7' + num_p0, '5' + num_p0, '4' + num_p0, '1' + num_p0, '3' + num_p0, '6' + num_p0, '8' + num_p0)
         lst = ('7' + num_p0, '5' + num_p0, '4' + num_p0, '1' + num_p0, '3' + num_p0, '6' + num_p0, '8' + num_p0)
