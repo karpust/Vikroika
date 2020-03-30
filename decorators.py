@@ -96,12 +96,23 @@ from datetime import datetime
 # greet = functools.partial(greet, 'превед', 'негодяй')
 # greet('красавчик')
 
+#
+# l = ['Коля', 'Маша', 'Витя']
+#
+# def people(*args):
+#    return args
+#
+# print(people(l))
+#
+# help(math)
 
-l = ['Коля', 'Маша', 'Витя']
+import sys
+import copy
+import math
+import win32com.client
+from pythoncom import VT_R8, VT_ARRAY, VT_DISPATCH, VT_BSTR, VT_I2, VT_VARIANT
 
-def people(*args):
-   return args
-
-print(people(l))
-
-help(math)
+sys.path.append("C:\\Users\\UserGeo\\AppData\Local\Programs\Python\Python37-32\Lib\site-packages\win32")
+sys.path.append("C:\\Users\\UserGeo\\AppData\Local\Programs\Python\Python37-32\Lib\site-packages")
+sys.path.append("C:\\Users\\UserGeo\\AppData\Local\Programs\Python\Python37-32\Lib\site-packages\win32\lib")
+sys.path.append("C:\\Users\\UserGeo\\AppData\Local\Programs\Python\Python37-32\Lib\site-packages\Pythowin")
